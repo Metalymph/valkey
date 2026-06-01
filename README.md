@@ -29,6 +29,7 @@ Built on top of the `moonbitlang/async` runtime.
     "Metalymph/valkey": "0.4.1"
   }
 }
+````
 
 example:
 
