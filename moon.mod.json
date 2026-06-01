@@ -6,7 +6,7 @@
     "moonbitlang/async": "0.17.1"
   },
   "readme": "README.md",
-  "repository": "https://github.com/Metalymph/relay",
+  "repository": "https://github.com/Metalymph/valkey",
   "license": "Apache-2.0",
   "keywords": [],
   "description": "Native async Valkey/Redis client for MoonBit"
