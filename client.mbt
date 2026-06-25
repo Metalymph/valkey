@@ -76,10 +76,7 @@ pub async fn Client::ping(self : Client) -> Unit raise Error {
 ///|
 /// get returns a string value by key, or None when the key does not exist.
 #cfg(target="native")
-pub async fn Client::get(
-  self : Client,
-  key : String,
-) -> String? raise Error {
+pub async fn Client::get(self : Client, key : String) -> String? raise Error {
   match self.request(["GET", key]) {
     BulkString(Some(value)) => Some(value)
     BulkString(None) => None
@@ -104,10 +101,7 @@ pub async fn Client::set(
 ///|
 /// del removes a key and returns the number of deleted keys.
 #cfg(target="native")
-pub async fn Client::del(
-  self : Client,
-  key : String,
-) -> Int64 raise Error {
+pub async fn Client::del(self : Client, key : String) -> Int64 raise Error {
   match self.request(["DEL", key]) {
     Integer(n) => n
     _ => raise ProtocolError("Expected integer DEL response")
@@ -117,10 +111,7 @@ pub async fn Client::del(
 ///|
 /// exists returns true when the key exists.
 #cfg(target="native")
-pub async fn Client::exists(
-  self : Client,
-  key : String,
-) -> Bool raise Error {
+pub async fn Client::exists(self : Client, key : String) -> Bool raise Error {
   match self.request(["EXISTS", key]) {
     Integer(0L) => false
     Integer(_) => true
@@ -167,17 +158,18 @@ pub async fn Client::xreadgroup(
   consumer : String,
   count : Int,
 ) -> (String, String)? raise Error {
-  match self.request([
-    "XREADGROUP",
-    "GROUP",
-    group,
-    consumer,
-    "COUNT",
-    count.to_string(),
-    "STREAMS",
-    stream,
-    ">",
-  ]) {
+  match
+    self.request([
+      "XREADGROUP",
+      "GROUP",
+      group,
+      consumer,
+      "COUNT",
+      count.to_string(),
+      "STREAMS",
+      stream,
+      ">",
+    ]) {
     Array(None) => None
     Array(Some(streams)) => parse_xreadgroup_one(streams)
     _ => raise ProtocolError("Unexpected XREADGROUP response")
@@ -196,19 +188,20 @@ pub async fn Client::xreadgroup_block(
   count : Int,
   block_ms : Int,
 ) -> (String, String)? raise Error {
-  match self.request([
-    "XREADGROUP",
-    "GROUP",
-    group,
-    consumer,
-    "COUNT",
-    count.to_string(),
-    "BLOCK",
-    block_ms.to_string(),
-    "STREAMS",
-    stream,
-    ">",
-  ]) {
+  match
+    self.request([
+      "XREADGROUP",
+      "GROUP",
+      group,
+      consumer,
+      "COUNT",
+      count.to_string(),
+      "BLOCK",
+      block_ms.to_string(),
+      "STREAMS",
+      stream,
+      ">",
+    ]) {
     Array(None) => None
     Array(Some(streams)) => parse_xreadgroup_one(streams)
     _ => raise ProtocolError("Unexpected XREADGROUP BLOCK response")
@@ -225,16 +218,17 @@ pub async fn Client::xautoclaim(
   consumer : String,
   min_idle_ms : Int,
 ) -> (String, String)? raise Error {
-  match self.request([
-    "XAUTOCLAIM",
-    stream,
-    group,
-    consumer,
-    min_idle_ms.to_string(),
-    "0-0",
-    "COUNT",
-    "1",
-  ]) {
+  match
+    self.request([
+      "XAUTOCLAIM",
+      stream,
+      group,
+      consumer,
+      min_idle_ms.to_string(),
+      "0-0",
+      "COUNT",
+      "1",
+    ]) {
     Array(Some(items)) => parse_xautoclaim_one(items)
     _ => raise ProtocolError("Unexpected XAUTOCLAIM response")
   }
@@ -295,9 +289,7 @@ fn parse_xreadgroup_one(
       }
 
       match stream_entry[1] {
-        Array(Some(messages)) => {
-          parse_stream_messages_one(messages)
-        }
+        Array(Some(messages)) => parse_stream_messages_one(messages)
         _ => raise ProtocolError("Unexpected stream messages")
       }
     }

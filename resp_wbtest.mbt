@@ -5,21 +5,23 @@ struct FixedReader {
   internal_buffer : @io.ReaderBuffer
 }
 
+///|
 fn FixedReader::new(s : String) -> FixedReader {
-  {
-    data: @utf8.encode(s),
-    offset: 0,
-    internal_buffer: @io.ReaderBuffer::new(),
-  }
+  { data: @utf8.encode(s), offset: 0, internal_buffer: @io.ReaderBuffer::new() }
 }
 
 ///|
-impl @io.Reader for FixedReader with _get_internal_buffer(self) {
+impl @io.Reader for FixedReader with fn _get_internal_buffer(self) {
   self.internal_buffer
 }
 
 ///|
-impl @io.Reader for FixedReader with _direct_read(self, buf, offset~, max_len~) {
+impl @io.Reader for FixedReader with fn _direct_read(
+  self,
+  buf,
+  offset~,
+  max_len~,
+) {
   let available = self.data.length() - self.offset
   let len = if max_len < available { max_len } else { available }
   if len <= 0 {
@@ -32,13 +34,12 @@ impl @io.Reader for FixedReader with _direct_read(self, buf, offset~, max_len~) 
   len
 }
 
+///|
 async fn assert_parse_fails(input : String) -> Unit {
   let reader = FixedReader::new(input)
   let parser = RespParser::new(reader)
 
-  let _ = parser.parse_value() catch {
-    _ => return
-  }
+  let _ = parser.parse_value() catch { _ => return }
 
   fail("Expected parse failure")
 }
